@@ -24,17 +24,15 @@ void Vehicle::setCurrentDestination(std::shared_ptr<Intersection> destination)
 
 void Vehicle::simulate()
 {
-    // launch drive function in a thread
-    threads.emplace_back(std::thread(&Vehicle::drive, this));
+    // Task L1.2 : Start a thread with the member function „drive“ and the object „this“ as the launch parameters. 
+    // Also, add the created thread into the _thread vector of the parent class. 
 }
 
 // virtual function which is executed in a thread
 void Vehicle::drive()
 {
     // print id of the current thread
-    std::unique_lock<std::mutex> lck(_mtx);
     std::cout << "Vehicle #" << _id << "::drive: thread id = " << std::this_thread::get_id() << std::endl;
-    lck.unlock();
 
     // initalize variables
     bool hasEnteredIntersection = false;
@@ -76,12 +74,6 @@ void Vehicle::drive()
             // check wether halting position in front of destination has been reached
             if (completion >= 0.9 && !hasEnteredIntersection)
             {
-                // request entry to the current intersection (using async)
-                auto ftrEntryGranted = std::async(&Intersection::addVehicleToQueue, _currDestination, get_shared_this());
-
-                // wait until entry has been granted
-                ftrEntryGranted.get();
-
                 // slow down and set intersection flag
                 _speed /= 10.0;
                 hasEnteredIntersection = true;
@@ -109,9 +101,6 @@ void Vehicle::drive()
                 
                 // pick the one intersection at which the vehicle is currently not
                 std::shared_ptr<Intersection> nextIntersection = nextStreet->getInIntersection()->getID() == _currDestination->getID() ? nextStreet->getOutIntersection() : nextStreet->getInIntersection(); 
-
-                // send signal to intersection that vehicle has left the intersection
-                _currDestination->vehicleHasLeft(get_shared_this());
 
                 // assign new street and destination
                 this->setCurrentDestination(nextIntersection);
