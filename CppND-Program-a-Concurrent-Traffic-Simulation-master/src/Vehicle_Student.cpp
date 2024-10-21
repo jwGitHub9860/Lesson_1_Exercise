@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <thread>   // defines "thread"
 #include "Street.h"
 #include "Intersection.h"
 #include "Vehicle.h"
@@ -28,7 +29,7 @@ void Vehicle::simulate()
 {
     // Task L1.2 : Start a thread with the member function „drive“ and the object „this“ as the launch parameters. 
     // Also, add the created thread into the _thread vector of the parent class. 
-    thread t(drive, this);
+    _threads.emplace_back(thread(&Vehicle::drive, this));   // launches drive function in thread
 }
 
 // virtual function which is executed in a thread
